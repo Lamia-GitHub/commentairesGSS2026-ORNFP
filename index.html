@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse des Commentaires Clients - Four Points Oran</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --sidebar-bg: #ffffff;
+            --primary-pastel: #e2e8f0;
+            --primary-accent: #475569;
+            --pos-bg: #f0fdf4;
+            --pos-text: #166534;
+            --pos-border: #bbf7d0;
+            --neg-bg: #fff5f5;
+            --neg-text: #9b2c2c;
+            --neg-border: #feb2b2;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navigation latérale */
+        nav {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--primary-pastel);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 10;
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-links a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: #f1f5f9;
+            color: var(--text-color);
+        }
+
+        /* Contenu principal */
+        main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 3rem;
+            max-width: 1200px;
+        }
+
+        header {
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .update-date {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Zone de filtres (2 lignes, 3 colonnes) */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            background: #ffffff;
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--primary-pastel);
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .filter-group select {
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .filter-group select:focus {
+            border-color: #94a3b8;
+        }
+
+        /* Conteneur de la table de données */
+        .table-container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            border: 1px solid var(--primary-pastel);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            padding: 1.25rem 1.5rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--primary-pastel);
+        }
+
+        td {
+            padding: 1.5rem;
+            vertical-align: top;
+            border-bottom: 1px solid var(--primary-pastel);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .month-cell {
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            font-size: 1.05rem;
+        }
+
+        /* Listes de points */
+        .feedback-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feedback-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            font-size: 0.95rem;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Style des points positifs */
+        .positive-col {
+            background-color: transparent;
+        }
+        
+        .positive-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .positive-list li {
+            color: #1e3a1e;
+        }
+
+        /* Style des points négatifs */
+        .negative-col {
+            background-color: transparent;
+        }
+
+        .negative-list li::before {
+            content: "✕";
+            position: absolute;
+            left: 0;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .negative-list li {
+            color: #4a1d1d;
+        }
+
+        /* Badge pour les cellules vides */
+        .empty-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* Badges de mois pour ancres */
+        .month-anchor {
+            scroll-margin-top: 2rem;
+        }
+
+        /* Utilitaires de filtrage cachés */
+        .hidden-item {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+            nav {
+                width: 100%;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--primary-pastel);
+                padding: 1.5rem;
+            }
+            main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            table, tr, td, th {
+                display: block;
+            }
+            th {
+                display: none;
+            }
+            td {
+                border-bottom: 1px solid var(--primary-pastel);
+            }
+            .month-cell {
+                background-color: #f8fafc;
+                border-bottom: 2px solid var(--primary-pastel);
+                padding-bottom: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-title">Navigation</div>
+        <ul class="nav-links">
+            <li><a href="#juin">Juin 2026</a></li>
+            <li><a href="#mai">Mai 2026</a></li>
+            <li><a href="#avril">Avril 2026</a></li>
+            <li><a href="#mars">Mars 2026</a></li>
+            <li><a href="#fevrier">Février 2026</a></li>
+            <li><a href="#janvier">Janvier 2026</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Analyse de la Satisfaction Client</h1>
+            <div class="subtitle">Rapport des points positifs et négatifs par mois — Four Points by Sheraton Oran</div>
+            <div class="update-date">Date de mise à jour : 5 juin 2026</div>
+
+            <!-- Grille de Dropdowns Menus (2 lignes, 3 colonnes) -->
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filter-elite">Elite Appreciation</label>
+                    <select id="filter-elite" class="comment-filter">
+                        <option value="all">Tous</option>
+                        <option value="pos">Positif</option>
+                        <option value="neg">Négatif</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-clean">Cleanliness</label>
+                    <select id="filter-clean" class="comment-filter">
+                        <option value="all">Tous</option>
+                        <option value="pos">Positif</option>
+                        <option value="neg">Négatif</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-fb">F&B</label>
+                    <select id="filter-fb" class="comment-filter">
+                        <option value="all">Tous</option>
+                        <option value="pos">Positif</option>
+                        <option value="neg">Négatif</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-maint">Maintenance & Upkeep</label>
+                    <select id="filter-maint" class="comment-filter">
+                        <option value="all">Tous</option>
+                        <option value="pos">Positif</option>
+                        <option value="neg">Négatif</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-staff">Staff Service</label>
+                    <select id="filter-staff" class="comment-filter">
+                        <option value="all">Tous</option>
+                        <option value="pos">Positif</option>
+                        <option value="neg">Négatif</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-brand">Brand Promise</label>
+                    <select id="filter-brand" class="comment-filter">
+                        <option value="all">Tous</option>
+                        <option value="pos">Positif</option>
+                        <option value="neg">Négatif</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Mois</th>
+                        <th style="width: 42.5%;">Points Positifs</th>
+                        <th style="width: 42.5%;">Points Négatifs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Juin -->
+                    <tr id="juin" class="month-anchor">
+                        <td class="month-cell">Juin 2026</td>
+                        <td class="positive-col">
+                            <ul class="feedback-list positive-list">
+                                <li data-cat="staff">Personnel de la réception chaleureux.</li>
+                                <li data-cat="fb,staff">Service de restauration exceptionnel (remerciements à Sliman, Aziz et Fatiha).</li>
+                                <li data-cat="brand">Sentiment de se sentir "comme à la maison".</li>
+                                <li data-cat="brand">Hôtel qualifié de "magnifique" avec d'excellents services.</li>
+                            </ul>
+                        </td>
+                        <td class="negative-col">
+                            <span class="empty-badge">Aucun point négatif signalé</span>
+                        </td>
+                    </tr>
+
+                    <!-- Mai -->
+                    <tr id="mai" class="month-anchor">
+                        <td class="month-cell">Mai 2026</td>
+                        <td class="positive-col">
+                            <ul class="feedback-list positive-list">
+                                <li data-cat="staff">Personnel accueillant, respectueux, professionnel et très serviable (mentions spéciales à Fatiha, Chef Aziz, Soufiane, Soumia, Yaakoub et Mohamed).</li>
+                                <li data-cat="fb">Excellente gestion de l'équipe du petit-déjeuner.</li>
+                                <li data-cat="clean">Chambres propres, spacieuses et confortables.</li>
+                                <li data-cat="brand">Superbe vue sur la Méditerranée.</li>
+                                <li data-cat="maint">Chambres bien entretenues (sur certains séjours).</li>
+                            </ul>
+                        </td>
+                        <td class="negative-col">
+                            <ul class="feedback-list negative-list">
+                                <li data-cat="maint">Coupures d'eau au robinet, absence d'eau froide ou d'eau chaude le matin.</li>
+                                <li data-cat="maint">Problèmes techniques : douches cassées, jacuzzi en maintenance, équipements vétustes (téléphone, fer à repasser).</li>
+                                <li data-cat="clean,fb">Propreté défaillante : moquette malodorante ou sale, mouches autour du fromage au buffet, poussière à la réception, espace SPA sale.</li>
+                                <li data-cat="fb">Restauration en baisse : plats pas à la hauteur, viennoiseries mal décongelées, buffet dégradé, jus d'orange industriel, manque de pain, mauvaise qualité de la viande, café machine de type infusion, mauvaise odeur en salle.</li>
+                                <li data-cat="brand">Retards de la navette aéroport et manque de synchronisation avec les vols.</li>
+                                <li data-cat="brand,staff">Manque de transparence de la réception sur les pannes du SPA (formule Pack Week-end froide).</li>
+                                <li data-cat="brand">Rupture de stocks sur l'eau minérale, les cintres et les peignoirs.</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <!-- Avril -->
+                    <tr id="avril" class="month-anchor">
+                        <td class="month-cell">Avril 2026</td>
+                        <td class="positive-col">
+                            <ul class="feedback-list positive-list">
+                                <li data-cat="brand">Accueil et hébergement de bon niveau à l'arrivée et au départ.</li>
+                                <li data-cat="staff">Personnel attentionné, disponible et très réactif (mentions spéciales à Houcine et Anfel à la réception, Sara au SPA et au coach sportif).</li>
+                                <li data-cat="brand">Bel endroit, installations globales de qualité.</li>
+                                <li data-cat="clean,fb">Chambres propres et petit-déjeuner varié (sur certains commentaires).</li>
+                                <li data-cat="elite">Surclassement en suite appliqué pour les membres fidèles.</li>
+                            </ul>
+                        </td>
+                        <td class="negative-col">
+                            <ul class="feedback-list negative-list">
+                                <li data-cat="brand">Incohérence majeure entre les tarifs affichés en ligne et les prix pratiqués sur place.</li>
+                                <li data-cat="clean">Dégradation générale des chambres : rideaux troués, moquettes sales, moisissures dans la douche, serviettes ternes.</li>
+                                <li data-cat="maint">Problèmes techniques : fenêtres cassées qui ne ferment pas (bruit de la route gênant le sommeil), pannes de Wi-Fi et de télévision.</li>
+                                <li data-cat="staff">Service jugé lent ou indifférent en terrasse (45 minutes d'attente pour une réponse inappropriée).</li>
+                                <li data-cat="fb">Restauration en baisse : buffet jugé trop cher (40 USD) pour une qualité médiocre, suppression du jus d'orange naturel (désormais facturé en extra).</li>
+                                <li data-cat="staff">Manque d'écoute de la réception : pas de proposition de relogement ni d'excuses pour les chambres défectueuses.</li>
+                                <li data-cat="staff">Comportement inapproprié du personnel face aux réclamations (réflexions déplacées de la réceptionniste sur le retard de la navette, serveur insinuant qu'un poil trouvé dans l'assiette venait du client).</li>
+                                <li data-cat="elite">Refus de surclassement injustifié pour un membre Titanium alors que des suites étaient disponibles.</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <!-- Mars -->
+                    <tr id="mars" class="month-anchor">
+                        <td class="month-cell">Mars 2026</td>
+                        <td class="positive-col">
+                            <ul class="feedback-list positive-list">
+                                <li data-cat="staff">Service à la clientèle et accueil de la réception exceptionnels (personnel souriant et gentil).</li>
+                                <li data-cat="brand">Sentiment d'être comme chez soi durant le mois de Ramadan.</li>
+                                <li data-cat="staff,brand">Prise en charge précieuse pour faciliter les déplacements (merci à Slimane, Fatiha, l'équipe F&B et Yakoub).</li>
+                            </ul>
+                        </td>
+                        <td class="negative-col">
+                            <ul class="feedback-list negative-list">
+                                <li data-cat="fb">Qualité de la nourriture et des boissons jugée bien en dessous de la moyenne.</li>
+                                <li data-cat="clean">Toilettes du lobby non conformes aux standards.</li>
+                                <li data-cat="maint">Chambres vieillissantes et jugées trop petites par rapport aux tarifs élevés.</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <!-- Février -->
+                    <tr id="fevrier" class="month-anchor">
+                        <td class="month-cell">Février 2026</td>
+                        <td class="positive-col">
+                            <ul class="feedback-list positive-list">
+                                <li data-cat="staff">Excellent accueil à la réception, chaleureux et disponible (mentions spéciales à Yakoub, Djamila et Anfel).</li>
+                                <li data-cat="clean">Chambres silencieuses et propres.</li>
+                                <li data-cat="staff">Équipe F&B dynamique et professionnelle (mentions à Insaf, Soufiane, Yani, Fatiha, Aya, Mohammed et Aziz).</li>
+                                <li data-cat="fb">Décoration et qualité exceptionnelles du déjeuner le 10/02 par le jeune chef Amine.</li>
+                                <li data-cat="staff">Prise en charge et écoute des clients en nette amélioration sur la fin du mois.</li>
+                            </ul>
+                        </td>
+                        <td class="negative-col">
+                            <ul class="feedback-list negative-list">
+                                <li data-cat="elite">Sentiment d'être traité comme un client de "seconde zone" par un réceptionniste malgré une convention d'entreprise (Sonatrach).</li>
+                                <li data-cat="brand">Tarifs très élevés et infrastructures nécessitant une rénovation globale.</li>
+                                <li data-cat="maint">Problèmes techniques en chambre : pas d'eau chaude, fenêtres cassées, eau brûlante incontrôlable dans le lavabo et le bidet.</li>
+                                <li data-cat="maint,staff">Dégradation de la salle de sport : WiFi en panne sur les tapis roulants, comportement rigide du responsable de la salle voulant imposer de la musique.</li>
+                                <li data-cat="brand">Le jacuzzi du SPA est devenu payant, ce qui a fortement déçu les habitués.</li>
+                                <li data-cat="fb,staff">Restauration : buffet à améliorer, fruits trop mûrs proches de la péremption, manque de variété dans la viande rouge (trop de volaille, excès de crème fraîche et sauces blanches), manque d'attention des serveurs lors d'une soirée (priorité donnée aux groupes étrangers).</li>
+                                <li data-cat="maint">Absence de douchette dans les toilettes.</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <!-- Janvier -->
+                    <tr id="janvier" class="month-anchor">
+                        <td class="month-cell">Janvier 2026</td>
+                        <td class="positive-col">
+                            <ul class="feedback-list positive-list">
+                                <li data-cat="staff">Accueil chaleureux, professionnel et fluide à l'arrivée comme au départ (mentions à Anfal, Mohamed, Sébastien et Sébastien).</li>
+                                <li data-cat="staff">Personnel au petit soin et très patient malgré les barrières de la langue avec les groupes étrangers.</li>
+                                <li data-cat="maint">Équipes techniques réactives (merci à Abderrazak pour l'installation rapide du boîtier TV).</li>
+                                <li data-cat="fb,staff">Restauration : petit-déjeuner au top, personnel F&B très agréable (Fatiha et Chef Aziz qualifiés de "meilleurs").</li>
+                                <li data-cat="brand">Organisation globale excellente pour les événements privés (mariage).</li>
+                            </ul>
+                        </td>
+                        <td class="negative-col">
+                            <ul class="feedback-list negative-list">
+                                <li data-cat="brand">Désorganisation totale à l'arrivée (chambre attribuée alors qu'elle était déjà occupée ou non préparée à 17h00).</li>
+                                <li data-cat="maint">Problèmes de plomberie : lavabo et bac de douche bouchés, absence d'eau chaude, absence de porte-savon.</li>
+                                <li data-cat="maint">Fenêtres bloquées en position ouverte, rendant la nuit glaciale et bruyante.</li>
+                                <li data-cat="fb">Qualité de la nourriture catastrophique sur certains séjours : produits périmés au petit-déjeuner (gâteaux secs, lait coupé à l'eau), viande dure comme de la pierre, riz bâclé au buffet.</li>
+                                <li data-cat="maint,brand">Manques flagrants en chambre : absence de chaînes de sport (BeIn Sports), pas de bouilloire électrique, pas de tapis antidérapant dans la baignoire, couverts ou sacs à linge manquants.</li>
+                                <li data-cat="fb">Plateau de courtoisie très pauvre (seulement 2 sachets de thé), utilisation de cuillères en plastique au petit-déjeuner.</li>
+                                <li data-cat="brand">Peignoirs et chaussons disponibles uniquement sur demande et non installés d'office.</li>
+                                <li data-cat="brand">Navette aéroport indisponible après 21h00, posant de lourdes difficultés pour les vols de nuit.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Script de filtrage logique -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filters = {
+                'elite': { element: document.getElementById('filter-elite'), key: 'elite' },
+                'clean': { element: document.getElementById('filter-clean'), key: 'clean' },
+                'fb': { element: document.getElementById('filter-fb'), key: 'fb' },
+                'maint': { element: document.getElementById('filter-maint'), key: 'maint' },
+                'staff': { element: document.getElementById('filter-staff'), key: 'staff' },
+                'brand': { element: document.getElementById('filter-brand'), key: 'brand' }
+            };
+
+            const selectElements = document.querySelectorAll('.comment-filter');
+            
+            selectElements.forEach(select => {
+                select.addEventListener('change', applyFilters);
+            });
+
+            function applyFilters() {
+                const items = document.querySelectorAll('.feedback-list li');
+                
+                items.forEach(item => {
+                    let isVisible = true;
+                    const itemCats = item.getAttribute('data-cat') ? item.getAttribute('data-cat').split(',') : [];
+                    const isPositive = item.parentElement.classList.contains('positive-list');
+
+                    for (const id in filters) {
+                        const filterVal = filters[id].element.value;
+                        const filterKey = filters[id].key;
+
+                        if (filterVal !== 'all') {
+                            const hasCategory = itemCats.includes(filterKey);
+                            
+                            if (filterVal === 'pos') {
+                                if (!hasCategory || !isPositive) isVisible = false;
+                            } else if (filterVal === 'neg') {
+                                if (!hasCategory || isPositive) isVisible = false;
+                            }
+                        }
+                    }
+
+                    if (isVisible) {
+                        item.classList.remove('hidden-item');
+                    } else {
+                        item.classList.add('hidden-item');
+                    }
+                });
+
+                // Gérer l'affichage visuel des conteneurs vides
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    const posList = row.querySelector('.positive-list');
+                    const negList = row.querySelector('.negative-list');
+                    const emptyBadge = row.querySelector('.empty-badge');
+
+                    if (posList) {
+                        const hasVisiblePos = posList.querySelectorAll('li:not(.hidden-item)').length > 0;
+                        if (!hasVisiblePos) {
+                            if (!posList.nextElementSibling || !posList.nextElementSibling.classList.contains('empty-badge')) {
+                                const placeholder = document.createElement('span');
+                                placeholder.className = 'empty-badge temp-badge';
+                                placeholder.textContent = 'Aucun élément';
+                                posList.style.display = 'none';
+                                posList.parentElement.appendChild(placeholder);
+                            }
+                        } else {
+                            posList.style.display = 'flex';
+                            const temp = posList.parentElement.querySelector('.temp-badge');
+                            if (temp) temp.remove();
+                        }
+                    }
+
+                    if (negList) {
+                        const hasVisibleNeg = negList.querySelectorAll('li:not(.hidden-item)').length > 0;
+                        if (!hasVisibleNeg) {
+                            if (!negList.nextElementSibling || !negList.nextElementSibling.classList.contains('empty-badge')) {
+                                const placeholder = document.createElement('span');
+                                placeholder.className = 'empty-badge temp-badge';
+                                placeholder.textContent = 'Aucun élément';
+                                negList.style.display = 'none';
+                                negList.parentElement.appendChild(placeholder);
+                            }
+                        } else {
+                            negList.style.display = 'flex';
+                            const temp = negList.parentElement.querySelector('.temp-badge');
+                            if (temp) temp.remove();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
