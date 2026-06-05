@@ -64,8 +64,8 @@
 
         .nav-links {
             list-style: none;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 0.5rem;
         }
 
@@ -77,6 +77,7 @@
             border-radius: 8px;
             font-weight: 500;
             transition: all 0.2s ease;
+            text-align: center;
         }
 
         .nav-links a:hover {
@@ -311,14 +312,14 @@
 <body>
 
     <nav>
-        <div class="nav-title">Navigation</div>
+        <div class="nav-title">Navigation 2026</div>
         <ul class="nav-links">
-            <li><a href="#juin">Juin 2026</a></li>
-            <li><a href="#mai">Mai 2026</a></li>
-            <li><a href="#avril">Avril 2026</a></li>
-            <li><a href="#mars">Mars 2026</a></li>
-            <li><a href="#fevrier">Février 2026</a></li>
-            <li><a href="#janvier">Janvier 2026</a></li>
+            <li><a href="#juin">Juin</a></li>
+            <li><a href="#mai">Mai</a></li>
+            <li><a href="#avril">Avril</a></li>
+            <li><a href="#mars">Mars</a></li>
+            <li><a href="#fevrier">Février</a></li>
+            <li><a href="#janvier">Janvier</a></li>
         </ul>
     </nav>
 
